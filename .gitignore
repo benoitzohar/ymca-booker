@@ -1,5 +1,4 @@
-cypress/videos
-cypress/screenshots
+build/
 
 # Logs
 logs
