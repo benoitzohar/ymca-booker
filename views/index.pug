@@ -1,0 +1,78 @@
+doctype html
+html
+  head
+    title YMCA Booker
+    style(type='text/css').
+      body {
+        padding: 10px;
+        font-family: Helvetica, Verdana, sans-serif;
+      }
+      table {
+        margin: 5px;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table td, table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      table tr:nth-child(even){
+        background-color: #f2f2f2;
+      }
+      table tr:hover {
+        background-color: #ddd;
+      }
+      table tr.success {
+        background-color: #4CAF50;
+      }
+      table tr.error {
+        background-color: #FF4C4F;
+      }
+
+      table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #4CAF50;
+        color: white;
+      }
+      
+
+
+  body
+    center
+      h1 YMCA Booker 
+
+    h2 Next bookings
+    table
+      tr
+        th Day
+        th Time
+        th Court
+        th User
+        th Date
+        th Booking will happen on
+      each slot in slots
+        tr
+          td= slot.day
+          td= slot.time pm
+          td &#35;#{slot.court}
+          td= slot.user
+          td= slot.date
+          td= slot.bookingDay
+
+    h2 Logs
+
+    if logs.length
+    table
+      tr
+        th Message
+        th Success
+        th Booked
+        th Date
+      each log in logs
+        tr(class=log.success ? (log.booked ? 'success' : '') : 'error')
+          td= log.message
+          td= log.success
+          td= log.booked
+          td= log.date

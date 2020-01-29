@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "express": "4.17.1",
+    "moment": "2.24.0",
+    "mongoose": "5.8.9",
+    "nodemon": "2.0.2",
+    "pug": "2.0.4",
+    "puppeteer": "2.0.0"
+  },
+  "scripts": {
+    "start": "nodemon index.js",
+    "book": "node book.js"
+  }
+}
