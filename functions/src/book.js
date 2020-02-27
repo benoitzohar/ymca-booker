@@ -8,5 +8,15 @@ exports.book = async function book() {
     databaseURL: "https://ymca-booker.firebaseio.com"
   });
 
+  await timeout(20);
+
   return "Book OK.";
 };
+
+async function timeout(x) {
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, x * 1000);
+  });
+}
