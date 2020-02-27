@@ -80,7 +80,7 @@ exports.getUsers = async function getUsers() {
 
 exports.addUser = async function addUser(username, name, barcode, pin) {
   return Users()
-    .code(username)
+    .doc(username)
     .set({
       username,
       name,
