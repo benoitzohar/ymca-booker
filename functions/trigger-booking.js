@@ -1,4 +1,4 @@
-const book = require("./src/book");
+const { book } = require("./src/book");
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== "POST") {
