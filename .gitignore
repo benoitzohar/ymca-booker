@@ -1,4 +1,5 @@
 build/
+google-credentials.json
 
 # Logs
 logs

@@ -20,7 +20,7 @@
     "start": "nodemon index.js",
     "book": "node book.js",
     "dev": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "node ./scripts/create-google-credentials.js && react-scripts build"
   },
   "eslintConfig": {
     "extends": "react-app"
