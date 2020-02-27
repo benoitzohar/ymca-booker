@@ -1,4 +1,5 @@
 var admin = require("firebase-admin");
+const uuidv4 = require("uuid/v4");
 
 var serviceAccount = require("./google-credentials.json");
 
@@ -39,21 +40,21 @@ exports.getBookings = async function getBookings() {
     .then(snapshot => {
       const bookings = [];
       snapshot.forEach(doc => {
-        bookings.push({ id: doc.id, ...doc.data });
+        bookings.push({ id: doc.id, ...doc.data() });
       });
       return { bookings };
     });
 };
 
-exports.addBooking = async function addBooking() {
+exports.addBooking = async function addBooking(user, day, time, court, repeat) {
   return Bookings()
-    .code()
-    .then(snapshot => {
-      const bookings = [];
-      snapshot.forEach(doc => {
-        bookings.push({ id: doc.id, ...doc.data });
-      });
-      return { bookings };
+    .code(uuidv4())
+    .set({
+      user,
+      day,
+      time,
+      court,
+      repeat
     });
 };
 
@@ -72,7 +73,7 @@ exports.getUsers = async function getUsers() {
     .then(snapshot => {
       const users = [];
       snapshot.forEach(doc => {
-        users.push({ id: doc.id, ...doc.data });
+        users.push({ id: doc.id, ...doc.data() });
       });
       return { users };
     });
@@ -86,5 +87,35 @@ exports.addUser = async function addUser(username, name, barcode, pin) {
       name,
       barcode,
       pin
+    });
+};
+
+//
+// Logs
+//
+
+function Logs() {
+  const db = connect();
+  return db.collection("logs");
+}
+
+exports.getLogs = async function getLogs() {
+  return Logs()
+    .get()
+    .then(snapshot => {
+      const logs = [];
+      snapshot.forEach(doc => {
+        logs.push(doc.data());
+      });
+      return { logs };
+    });
+};
+
+exports.addLog = async function addLog(message) {
+  return Bookings()
+    .code(uuidv4())
+    .set({
+      createdAt: new Date(),
+      message
     });
 };

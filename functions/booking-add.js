@@ -1,6 +1,6 @@
 const querystring = require("querystring");
 
-const { addUser } = require("./src/firebase");
+const { addBooking } = require("./src/firebase");
 const { checkAuthorization } = require("./src/api");
 
 exports.handler = async (event, context) => {
@@ -9,14 +9,14 @@ exports.handler = async (event, context) => {
     return rejected;
   }
 
-  const { username, name, barcode, pin } = querystring.parse(event.body);
+  const { user, day, time, court, repeat } = querystring.parse(event.body);
 
-  if (!username || !name || !barcode || !pin) {
+  if (!user || !day || !time || !court || !repeat) {
     return { statusCode: 405, body: "Missing params" };
   }
 
   try {
-    await addUser(username, name, barcode, pin);
+    await addBooking(user, day, time, court, repeat);
     return { statusCode: 200, body: "{status: 'OK'}" };
   } catch (error) {
     return { statusCode: 500, body: error.message };

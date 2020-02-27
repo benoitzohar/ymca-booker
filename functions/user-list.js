@@ -1,8 +1,10 @@
 const { getUsers } = require("./src/firebase");
+const { checkAuthorization } = require("./src/api");
 
 exports.handler = async (event, context) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Not Allowed" };
+  const rejected = checkAuthorization(event);
+  if (rejected) {
+    return rejected;
   }
 
   try {
