@@ -8,15 +8,15 @@ exports.book = async function book() {
     databaseURL: "https://ymca-booker.firebaseio.com"
   });
 
-  await timeout(20);
+  const db = admin.firestore();
+
+  let docRef = db.collection("users").doc("alovelace");
+
+  docRef.set({
+    first: "Ada",
+    last: "Lovelace",
+    born: 1815
+  });
 
   return "Book OK.";
 };
-
-async function timeout(x) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, x * 1000);
-  });
-}
