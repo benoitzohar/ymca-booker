@@ -1,6 +1,6 @@
-import book from "./src/book";
+const book = require("./src/book");
 
-export async function handler(event, context) {
+exports.handler = async (event, context) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
@@ -11,4 +11,4 @@ export async function handler(event, context) {
   } catch (error) {
     return { statusCode: 500, body: error.message };
   }
-}
+};
