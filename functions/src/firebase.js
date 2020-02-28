@@ -1,5 +1,5 @@
 var admin = require("firebase-admin");
-const uuidv4 = require("uuid/v4");
+const uuid = require("uuid");
 
 var serviceAccount = require("./google-credentials.json");
 
@@ -34,27 +34,49 @@ function Bookings() {
   return db.collection("bookings");
 }
 
-exports.getBookings = async function getBookings() {
-  return Bookings()
-    .get()
-    .then(snapshot => {
-      const bookings = [];
-      snapshot.forEach(doc => {
-        bookings.push({ id: doc.id, ...doc.data() });
-      });
-      return { bookings };
+exports.getBookings = async function getBookings(status) {
+  const query = status ? Bookings().where("status", "==", status) : Bookings();
+
+  return query.get().then(snapshot => {
+    const bookings = [];
+    snapshot.forEach(doc => {
+      bookings.push({ id: doc.id, ...doc.data() });
     });
+    return { bookings };
+  });
 };
 
 exports.addBooking = async function addBooking(user, day, time, court, repeat) {
   return Bookings()
-    .code(uuidv4())
+    .doc(uuid.v4())
     .set({
       user,
       day,
       time,
       court,
-      repeat
+      repeat,
+      status: "PENDING"
+    });
+};
+
+exports.updateBookingStatus = async function updateBookingStatus(id, status) {
+  return Bookings()
+    .doc(id)
+    .update({
+      status
+    });
+};
+
+exports.addLogToBooking = async function addLogToBooking(bookingId, message) {
+  return Bookings()
+    .doc(bookingId)
+    .get()
+    .then(doc => {
+      const logs = doc.data().logs || [];
+      logs.push({ message, createdAt: new Date() });
+      return Bookings()
+        .doc(bookingId)
+        .update({ logs });
     });
 };
 
@@ -112,10 +134,27 @@ exports.getLogs = async function getLogs() {
 };
 
 exports.addLog = async function addLog(message) {
-  return Bookings()
-    .code(uuidv4())
+  return Logs()
+    .doc(uuid.v4())
     .set({
       createdAt: new Date(),
       message
+    });
+};
+
+//
+// Settings
+//
+
+function Settings() {
+  const db = connect();
+  return db.collection("settings");
+}
+
+exports.setLastRun = async function setLastRun() {
+  return Settings()
+    .doc("settings")
+    .set({
+      lastRun: new Date()
     });
 };

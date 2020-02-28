@@ -1,13 +1,14 @@
 const { book } = require("./src/book");
+const { checkAuthorization } = require("./src/api");
 
 exports.handler = async (event, context) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+  const rejected = checkAuthorization(event);
+  if (rejected) {
+    return rejected;
   }
-
   try {
-    const result = await book();
-    return { statusCode: 200, body: result || "OK" };
+    await book();
+    return { statusCode: 200, body: "OK" };
   } catch (error) {
     return { statusCode: 500, body: error.message };
   }
