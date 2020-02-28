@@ -9,13 +9,13 @@ async function doFetch(endpoint, data = {}) {
         "Content-Type": "application/json"
         // 'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({ token: "aa", data })
+      body: JSON.stringify({ token: localStorage.getItem("TOKEN"), data })
     };
     const response = await fetch(API_URL + endpoint, params);
     return await response.json();
   } catch (error) {
     console.error(error);
-    return {};
+    throw error;
   }
 }
 
