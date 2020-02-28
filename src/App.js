@@ -48,7 +48,7 @@ function App() {
           <Logs logs={logs} />
         </div>
       </Content>
-      {token && <Password setToken={setToken} />}
+      {!token && <Password setToken={setToken} />}
     </Layout>
   );
 }
