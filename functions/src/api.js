@@ -11,5 +11,6 @@ exports.checkAuthorization = async function checkAuthorization(event) {
   if (!token || token !== API_TOKEN) {
     return { statusCode: 403, body: "Not Allowed" };
   }
+
   return null;
 };
