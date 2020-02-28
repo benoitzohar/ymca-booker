@@ -203,9 +203,3 @@ exports.book = async function book() {
     throw err;
   }
 };
-
-try {
-  exports.book();
-} catch (e) {
-  console.log("[BZ] ERROR:", e);
-}

@@ -1,11 +1,17 @@
 import React from "react";
+import { Timeline } from "antd";
 
 function Logs({ logs }) {
   return (
     <div className="Logs">
-      {logs.map(log => (
-        <div className="log">{log.message}</div>
-      ))}
+      <Timeline>
+        {logs.map(log => (
+          <Timeline.Item>
+            <p>{log.createdAt}</p>
+            <p>{log.message}</p>
+          </Timeline.Item>
+        ))}
+      </Timeline>
     </div>
   );
 }
