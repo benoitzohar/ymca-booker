@@ -2,7 +2,7 @@ const querystring = require("querystring");
 
 const { API_TOKEN } = process.env;
 
-exports.checkAuthorization = async function checkAuthorization(event) {
+exports.checkAuthorization = function checkAuthorization(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Not Allowed" };
   }
