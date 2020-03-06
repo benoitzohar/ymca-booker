@@ -12,15 +12,21 @@ const {
   setLastRun
 } = require("./firebase");
 
-exports.book = async function book() {};
-/* 
 const puppeteerOpts = process.env.DEBUG
   ? {
       headless: false,
-      devtools: true
+      devtools: true,
+      executablePath: await chromium.executablePath,
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      headless: chromium.headless
     }
   : {
-      args: ["--no-sandbox"]
+      args: ["--no-sandbox"],
+      executablePath: await chromium.executablePath,
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      headless: chromium.headless
     };
 
 const WAIT_TIME = 500;
@@ -206,4 +212,3 @@ exports.book = async function book() {
     throw err;
   }
 };
- */
