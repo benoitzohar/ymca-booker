@@ -1,6 +1,7 @@
-//const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("chrome-aws-lambda");
 const moment = require("moment");
-/*
+
 const {
   getBookings,
   addBooking,
@@ -9,7 +10,7 @@ const {
   addLog,
   getUsers,
   setLastRun
-} = require("./firebase"); */
+} = require("./firebase");
 
 exports.book = async function book() {};
 /* 
