@@ -1,6 +1,6 @@
-/* const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer");
 const moment = require("moment");
-
+/*
 const {
   getBookings,
   addBooking,
