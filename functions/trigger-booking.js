@@ -1,4 +1,4 @@
-const { book } = require("./src/book");
+//const { book } = require("./src/book");
 const { checkAuthorization } = require("./src/api");
 
 exports.handler = async (event, context) => {
