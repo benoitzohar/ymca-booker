@@ -2,16 +2,19 @@ const API_URL = "https://ymca.benoitzohar.com/.netlify/functions/";
 
 async function doFetch(endpoint, data = {}) {
   try {
+    const body = new URLSearchParams();
+    body.set("token", localStorage.getItem("TOKEN"));
+    Object.keys(data).forEach(key => {
+      body.set(key, data[key]);
+    });
+
     const params = {
       method: "POST",
       mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: JSON.stringify({ token: localStorage.getItem("TOKEN"), data })
+      body
     };
     const response = await fetch(API_URL + endpoint, params);
+    console.log("response:", response);
     return await response.json();
   } catch (error) {
     console.error(error);
