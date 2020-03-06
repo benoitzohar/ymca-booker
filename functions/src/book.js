@@ -11,6 +11,8 @@ const {
   setLastRun
 } = require("./firebase");
 
+exports.book = async function book() {};
+/* 
 const puppeteerOpts = process.env.DEBUG
   ? {
       headless: false,
@@ -203,3 +205,4 @@ exports.book = async function book() {
     throw err;
   }
 };
+ */
