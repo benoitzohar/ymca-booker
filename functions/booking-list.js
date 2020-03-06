@@ -1,5 +1,7 @@
-const { getUsers } = require("../src/firebase");
-const { checkAuthorization } = require("../src/api");
+const querystring = require("querystring");
+
+const { getBookings } = require("./src/firebase");
+const { checkAuthorization } = require("./src/api");
 
 exports.handler = async (event, context) => {
   const rejected = checkAuthorization(event);
@@ -8,7 +10,8 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const result = await getUsers();
+    const { status } = querystring.parse(event.body);
+    const result = await getBookings(status || undefined);
     if (!result) {
       return { statusCode: 200, body: "{}" };
     }

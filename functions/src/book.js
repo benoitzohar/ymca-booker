@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer");
+/* const puppeteer = require("puppeteer");
 const moment = require("moment");
 
 const {
@@ -9,7 +9,7 @@ const {
   addLog,
   getUsers,
   setLastRun
-} = require("./firebase");
+} = require("./firebase"); */
 
 exports.book = async function book() {};
 /* 
