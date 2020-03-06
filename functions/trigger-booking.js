@@ -7,7 +7,7 @@ exports.handler = async (event, context) => {
     return rejected;
   }
   try {
-    await book();
+    //await book();
     return { statusCode: 200, body: "OK" };
   } catch (error) {
     return { statusCode: 500, body: error.message };

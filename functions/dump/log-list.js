@@ -1,5 +1,5 @@
-const { getUsers } = require("./src/firebase");
-const { checkAuthorization } = require("./src/api");
+const { getLogs } = require("../src/firebase");
+const { checkAuthorization } = require("../src/api");
 
 exports.handler = async (event, context) => {
   const rejected = checkAuthorization(event);
@@ -8,7 +8,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const result = await getUsers();
+    const result = await getLogs();
     if (!result) {
       return { statusCode: 200, body: "{}" };
     }

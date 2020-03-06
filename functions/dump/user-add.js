@@ -1,7 +1,7 @@
 const querystring = require("querystring");
 
-const { addUser } = require("./src/firebase");
-const { checkAuthorization } = require("./src/api");
+const { addUser } = require("../src/firebase");
+const { checkAuthorization } = require("../src/api");
 
 exports.handler = async (event, context) => {
   const rejected = checkAuthorization(event);
