@@ -5,6 +5,7 @@ import "firebase/firestore";
 
 import Logs from "./Logs";
 import Actions from "./Actions";
+import Bookings from "./Bookings";
 import Password from "./Password";
 import { fetchUsers } from "./api";
 
@@ -58,12 +59,12 @@ function App() {
           </Menu.Item>
         </Menu>
       </Header>
-      <Content style={{ padding: "0 50px", marginTop: 64 }}>
+      <Content style={{ padding: "0 10px", marginTop: 64 }}>
         <Breadcrumb style={{ margin: "16px 0" }}></Breadcrumb>
         <Actions />
-        <div style={{ background: "#fff", padding: 24, minHeight: 380 }}>
-          <Logs />
-        </div>
+        <Bookings />
+
+        <Logs />
       </Content>
       {!token && <Password setToken={setToken} />}
     </Layout>

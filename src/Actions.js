@@ -19,7 +19,7 @@ function Actions() {
       value.docs.forEach(doc => {
         const item = doc.data();
         setSettings({
-          ...item,
+          lastRun: item.lastRun.toDate(),
           lastRunFrom: moment(item.lastRun.toDate()).fromNow()
         });
       });
@@ -28,7 +28,7 @@ function Actions() {
 
   useInterval(() => {
     setSettings({
-      lastRunFrom: moment(settings.lastRun.toDate()).fromNow()
+      lastRunFrom: moment(settings.lastRun).fromNow()
     });
   }, 30000);
 

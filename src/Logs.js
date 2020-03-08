@@ -28,18 +28,21 @@ function Logs() {
     });
 
   return (
-    <div className="Logs">
-      <Timeline>
-        {error && <strong>Error: {JSON.stringify(error)}</strong>}
-        {loading && <span>Loading...</span>}
-        {logs &&
-          logs.map(log => (
-            <Timeline.Item key={log.id}>
-              <p>{log.createdAt}</p>
-              <p>{log.message}</p>
-            </Timeline.Item>
-          ))}
-      </Timeline>
+    <div style={{ marginTop: "10px" }}>
+      <h3>Bot Logs</h3>
+      <div style={{ background: "#fff", padding: 16, minHeight: 380 }}>
+        <Timeline>
+          {error && <strong>Error: {JSON.stringify(error)}</strong>}
+          {loading && <span>Loading...</span>}
+          {logs &&
+            logs.map(log => (
+              <Timeline.Item key={log.id}>
+                <p>{log.createdAt}</p>
+                <p>{log.message}</p>
+              </Timeline.Item>
+            ))}
+        </Timeline>
+      </div>
     </div>
   );
 }
