@@ -1,7 +1,7 @@
 const querystring = require("querystring");
 
 const { book } = require("./src/book");
-const { checkAuthorization } = require("./src/api");
+const { checkAuthorization, response } = require("./src/api");
 
 exports.handler = async (event, context) => {
   const rejected = checkAuthorization(event);
@@ -11,9 +11,9 @@ exports.handler = async (event, context) => {
   try {
     const { verbose } = querystring.parse(event.body);
     await book(!!verbose);
-    return { statusCode: 200, body: "OK" };
+    return response({ status: "OK" });
   } catch (error) {
-    return { statusCode: 500, body: error.message };
+    return response(error.message, 500);
   }
 };
 

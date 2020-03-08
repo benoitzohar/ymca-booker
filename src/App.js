@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Menu, Icon, Breadcrumb } from "antd";
+import firebase from "firebase";
+import "firebase/firestore";
 
 import Logs from "./Logs";
+import Actions from "./Actions";
 import Password from "./Password";
-import { fetchLogs } from "./api";
+import { fetchUsers } from "./api";
 
 import "./App.css";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCYpybXYpojsNR4jEXtnPWwlvtz4czN1iw",
+  authDomain: "ymca-booker.firebaseapp.com",
+  databaseURL: "https://ymca-booker.firebaseio.com",
+  projectId: "ymca-booker",
+  storageBucket: "ymca-booker.appspot.com",
+  messagingSenderId: "293180352614",
+  appId: "1:293180352614:web:1243a8530e33d8e1bd25a7"
+};
+firebase.initializeApp(firebaseConfig);
 
 const { Header, Content } = Layout;
 
 function App() {
   const [token, setLocalToken] = useState(localStorage.getItem("TOKEN"));
-  const [logs, setLogs] = useState([]);
+  const [users, setUsers] = useState([]);
 
   function setToken(newToken) {
     localStorage.setItem("TOKEN", newToken);
@@ -20,10 +34,11 @@ function App() {
 
   useEffect(() => {
     if (token) {
-      fetchLogs()
-        .then(setLogs)
-        .catch(() => {
-          /* setToken("") */
+      fetchUsers()
+        .then(setUsers)
+        .catch(err => {
+          console.error(err.message);
+          //alert("Could not fetch Users");
         });
     }
   }, [token]);
@@ -34,7 +49,7 @@ function App() {
         <Menu
           theme="dark"
           mode="horizontal"
-          defaultSelectedKeys={["2"]}
+          defaultSelectedKeys={["1"]}
           style={{ lineHeight: "64px" }}
         >
           <Menu.Item key="1">
@@ -45,8 +60,9 @@ function App() {
       </Header>
       <Content style={{ padding: "0 50px", marginTop: 64 }}>
         <Breadcrumb style={{ margin: "16px 0" }}></Breadcrumb>
+        <Actions />
         <div style={{ background: "#fff", padding: 24, minHeight: 380 }}>
-          <Logs logs={logs} />
+          <Logs />
         </div>
       </Content>
       {!token && <Password setToken={setToken} />}

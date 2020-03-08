@@ -22,16 +22,11 @@ async function doFetch(endpoint, data = {}) {
   }
 }
 
-export const fetchLogs = async function fetchLogs() {
-  let { logs } = await doFetch("log-list");
-  logs = logs || [];
-  return logs.map(log => {
-    const createdAt = moment(new Date(log.createdAt._seconds * 1000));
-    return {
-      ...log,
-      createdAt: `${createdAt.fromNow()} (${createdAt.format(
-        "dddd, MMMM Do, h:mm:ss a"
-      )})`
-    };
-  });
+export const fetchUsers = async function fetchUsers() {
+  return await doFetch("user-list");
+};
+
+export const triggerBooking = async function triggerBooking() {
+  await doFetch("trigger-booking");
+  return true;
 };
