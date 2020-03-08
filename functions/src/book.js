@@ -12,24 +12,6 @@ const {
   setLastRun
 } = require("./firebase");
 
-const puppeteerOpts = async () =>
-  process.env.DEBUG
-    ? {
-        headless: false,
-        devtools: true,
-        executablePath: await chromium.executablePath,
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        headless: chromium.headless
-      }
-    : {
-        args: ["--no-sandbox"],
-        executablePath: await chromium.executablePath,
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        headless: chromium.headless
-      };
-
 const WAIT_TIME = 500;
 
 const SQUASH_COURT_REFERENCES = {
@@ -153,7 +135,12 @@ exports.book = async function book() {
   const { users } = await getUsers();
   await setLastRun();
   try {
-    const browser = await puppeteer.launch(puppeteerOpts());
+    const browser = await chromium.puppeteer.launch({
+      executablePath: await chromium.executablePath,
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      headless: chromium.headless
+    });
     let noBookingToday = true;
     const targetDate = moment.utc().add(2, "days");
     const targetDayNumber = targetDate.weekday();
