@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Menu, Icon, Breadcrumb } from "antd";
+import { Layout } from "antd";
 import firebase from "firebase";
 import "firebase/firestore";
 
@@ -47,23 +47,13 @@ function App() {
   return (
     <Layout>
       <Header style={{ position: "fixed", zIndex: 1, width: "100%" }}>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          defaultSelectedKeys={["1"]}
-          style={{ lineHeight: "64px" }}
-        >
-          <Menu.Item key="1">
-            <Icon type="appstore-o" />
-            <span className="nav-text">YMCA Booker</span>
-          </Menu.Item>
-        </Menu>
+        <h1 style={{ color: "white", textAlign: "center", fontSize: "30px" }}>
+          YMCA Booker
+        </h1>
       </Header>
-      <Content style={{ padding: "0 10px", marginTop: 64 }}>
-        <Breadcrumb style={{ margin: "16px 0" }}></Breadcrumb>
-        <Actions />
+      <Content style={{ padding: "0 10px", marginTop: "80px" }}>
         <Bookings />
-
+        <Actions />
         <Logs />
       </Content>
       {!token && <Password setToken={setToken} />}

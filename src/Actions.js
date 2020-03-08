@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "antd";
+import { Button, Popconfirm } from "antd";
 import firebase from "firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
 import moment from "moment";
@@ -44,18 +44,31 @@ function Actions() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      {error && <strong>Error: {JSON.stringify(error)}</strong>}
-      {loading && <span>Loading...</span>}
-      <Button
-        type="primary"
-        shape="round"
-        onClick={attemptBooking}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        margin: "20px"
+      }}
+    >
+      <Popconfirm
+        placement="bottom"
+        title="The booking is run automatically every morning every 10 minutes between 00:00 and 01:00. Are you sure you want to manually trigger a booking now?"
+        onConfirm={attemptBooking}
+        okText="Yes"
+        cancelText="No"
         disabled={booking}
       >
-        {booking ? "Loading..." : "Trigger booking"}
-      </Button>
-      {settings && <span>Last attempt: {settings.lastRunFrom}</span>}
+        <Button type="primary" shape="round" disabled={booking}>
+          {booking ? "Loading..." : "Trigger booking"}
+        </Button>
+      </Popconfirm>
+      <div style={{ textAlign: "center" }}>
+        {error && <strong>Error: {JSON.stringify(error)}</strong>}
+        {loading && <span>Loading...</span>}
+        {settings && <span>Last attempt: {settings.lastRunFrom}</span>}
+      </div>
     </div>
   );
 }

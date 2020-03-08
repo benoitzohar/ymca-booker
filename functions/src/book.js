@@ -13,6 +13,7 @@ const {
 } = require("./firebase");
 
 const WAIT_TIME = 500;
+const MAX_ATTEMPTS = 6;
 
 const SQUASH_COURT_REFERENCES = {
   "2": "43",
@@ -177,7 +178,11 @@ exports.book = async function book(verbose = false) {
         }
 
         verboseLog(verbose, "Update booking status to RUNNING");
-        await updateBookingStatus(booking.id, "RUNNING");
+        await updateBookingStatus(
+          booking.id,
+          "RUNNING",
+          (booking.attempts || 0) + 1
+        );
 
         try {
           verboseLog(verbose, "Create new page");
@@ -194,7 +199,7 @@ exports.book = async function book(verbose = false) {
           verboseLog(verbose, "Add log to booking");
           await addLogToBooking(
             booking.id,
-            `Booking with ${user.name} for court #${booking.court} at ${
+            `Booked with ${user.name} for court #${booking.court} at ${
               booking.time
             }pm on ${targetDate.format("dddd, MMMM Do YYYY")}`
           );
@@ -202,6 +207,10 @@ exports.book = async function book(verbose = false) {
           await updateBookingStatus(booking.id, "SUCCESS");
 
           if (booking.repeat) {
+            verboseLog(verbose, {
+              log: "Create new reccurring booking for",
+              booking
+            });
             await addBooking(
               user.id,
               booking.day,
@@ -212,8 +221,27 @@ exports.book = async function book(verbose = false) {
           }
         } catch (err) {
           verboseLog(verbose, { error2: err.message });
-          verboseLog(verbose, "Update booking status to PENDING in error");
-          await updateBookingStatus(booking.id, "PENDING");
+          if (booking.attempts >= MAX_ATTEMPTS) {
+            verboseLog(verbose, "Update booking status to FAILURE in error");
+            await updateBookingStatus(booking.id, "FAILURE");
+            verboseLog(verbose, {
+              log: "Create new reccurring booking for",
+              booking
+            });
+            if (booking.repeat) {
+              await addBooking(
+                user.id,
+                booking.day,
+                booking.time,
+                booking.court,
+                true
+              );
+            }
+          } else {
+            verboseLog(verbose, "Update booking status to PENDING in error");
+            await updateBookingStatus(booking.id, "PENDING");
+          }
+
           verboseLog(verbose, "Add log to booking in error");
           await addLogToBooking(booking.id, err.message);
         }

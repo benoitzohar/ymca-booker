@@ -55,15 +55,23 @@ exports.addBooking = async function addBooking(user, day, time, court, repeat) {
       time,
       court,
       repeat,
-      status: "PENDING"
+      status: "PENDING",
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 };
 
-exports.updateBookingStatus = async function updateBookingStatus(id, status) {
+exports.updateBookingStatus = async function updateBookingStatus(
+  id,
+  status,
+  attempts = 0
+) {
   return Bookings()
     .doc(id)
     .update({
-      status
+      status,
+      ...(attempts ? { attempts } : {}),
+      updatedAt: new Date()
     });
 };
 

@@ -1,4 +1,4 @@
-import moment from "moment";
+import { message } from "antd";
 
 const API_URL = "https://ymca.benoitzohar.com/.netlify/functions/";
 
@@ -18,6 +18,7 @@ async function doFetch(endpoint, data = {}) {
     return await response.json();
   } catch (error) {
     console.error(error);
+    message.error(error.message);
     throw error;
   }
 }
