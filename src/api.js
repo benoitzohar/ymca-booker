@@ -10,7 +10,6 @@ async function doFetch(endpoint, data = {}) {
 
     const params = {
       method: "POST",
-      mode: "no-cors",
       body
     };
     const response = await fetch(API_URL + endpoint, params);

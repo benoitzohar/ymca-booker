@@ -12,7 +12,6 @@ const { Header, Content } = Layout;
 function App() {
   const [token, setLocalToken] = useState(localStorage.getItem("TOKEN"));
   const [logs, setLogs] = useState([]);
-  console.log("[BZ] token:", token);
 
   function setToken(newToken) {
     localStorage.setItem("TOKEN", newToken);
@@ -23,7 +22,9 @@ function App() {
     if (token) {
       fetchLogs()
         .then(setLogs)
-        .catch(() => setToken(""));
+        .catch(() => {
+          /* setToken("") */
+        });
     }
   }, [token]);
 
