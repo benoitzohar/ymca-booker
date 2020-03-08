@@ -72,7 +72,8 @@ exports.addLogToBooking = async function addLogToBooking(bookingId, message) {
     .doc(bookingId)
     .get()
     .then(doc => {
-      const logs = doc.data().logs || [];
+      const data = doc.data();
+      const logs = (data && data.logs) || [];
       logs.push({ message, createdAt: new Date() });
       return Bookings()
         .doc(bookingId)

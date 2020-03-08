@@ -21,8 +21,6 @@ const SQUASH_COURT_REFERENCES = {
   "5": "46"
 };
 
-console.log("Starting puppeteer.launch() from book.js...");
-
 const escapeXpathString = str => {
   const splitedQuotes = str.replace(/'/g, `', "'", '`);
   return `concat('${splitedQuotes}', '')`;
@@ -39,18 +37,19 @@ const clickByText = async (page, text) => {
   }
 };
 
-async function attemptBooking(p, targetDate, user, time, court) {
+async function attemptBooking(p, targetDate, user, time, court, verbose) {
   const targetDay = targetDate.get("date");
   const targetMonth = targetDate.get("month") + 1;
-
+  verboseLog(verbose, { browser: "Go to" });
   await p.goto("https://inscription.ymcaquebec.org");
 
-  await logout(p);
+  await logout(p, verbose);
 
   //
   // LOGIN
   //
 
+  verboseLog(verbose, { browser: "Login" });
   await p.click("#toolbar-login > .focus-parent");
   await p.waitFor(WAIT_TIME);
   await p.click("#ClientBarcode");
@@ -60,11 +59,12 @@ async function attemptBooking(p, targetDate, user, time, court) {
   await p.click("#Enter");
   await p.waitFor(WAIT_TIME);
 
-  const ignorePreviousTransactionsSelectore =
+  const ignorePreviousTransactionsSelector =
     "a[title='Click to ignore previous incomplete transactions']";
 
-  if ((await p.$(ignorePreviousTransactionsSelectore)) !== null) {
-    p.click(ignorePreviousTransactionsSelectore);
+  if ((await p.$(ignorePreviousTransactionsSelector)) !== null) {
+    verboseLog(verbose, { browser: "ignorePreviousTransactions" });
+    p.click(ignorePreviousTransactionsSelector);
     await p.waitFor(WAIT_TIME);
   }
 
@@ -72,6 +72,7 @@ async function attemptBooking(p, targetDate, user, time, court) {
   // BOOKING
   //
 
+  verboseLog(verbose, { browser: "Start booking" });
   await clickByText(p, "Court Reservations");
   await p.waitForNavigation();
   await p.click("#search-facbook-radio");
@@ -100,6 +101,7 @@ async function attemptBooking(p, targetDate, user, time, court) {
 
   const rows = await p.$$(".search-result-row");
   if (rows.length !== 1) {
+    verboseLog(verbose, "No rows available");
     throw new Error(
       `Could not book for ${
         user.name
@@ -109,6 +111,7 @@ async function attemptBooking(p, targetDate, user, time, court) {
     );
   }
 
+  verboseLog(verbose, { browser: "Found row, process to checkout" });
   await p.click("#chkBook1");
   await p.click("#AddBookBottom");
   await p.waitFor(WAIT_TIME);
@@ -119,10 +122,11 @@ async function attemptBooking(p, targetDate, user, time, court) {
   await p.click("#completeTransactionButton");
 
   await p.waitFor(WAIT_TIME);
-  await logout(p);
+  await logout(p, verbose);
 }
 
-async function logout(p) {
+async function logout(p, verbose) {
+  verboseLog(verbose, { browser: "Logout" });
   const logoutSelector = "#toolbar-logout > .custombtn";
   if ((await p.$$(logoutSelector)).length) {
     await p.click(logoutSelector);
@@ -130,12 +134,30 @@ async function logout(p) {
   await p.waitFor(WAIT_TIME);
 }
 
-exports.book = async function book() {
+function verboseLog(verbose, data) {
+  if (verbose) {
+    if (typeof data === "string") {
+      console.log(data);
+    } else {
+      Object.keys(data).forEach(key =>
+        console.log(`${key}:`, JSON.stringify(data[key], null, 2))
+      );
+    }
+  }
+}
+
+exports.book = async function book(verbose = false) {
   const { bookings } = await getBookings("PENDING");
+  verboseLog(verbose, { bookings });
   const { users } = await getUsers();
+  verboseLog(verbose, { users });
+
+  verboseLog(verbose, "setLastRun()");
   await setLastRun();
+  let browser;
   try {
-    const browser = await chromium.puppeteer.launch({
+    verboseLog(verbose, "Starting puppeteer.launch() from book.js...");
+    browser = await chromium.puppeteer.launch({
       executablePath: await chromium.executablePath,
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
@@ -147,29 +169,36 @@ exports.book = async function book() {
 
     for (const booking of bookings) {
       if (booking.day === targetDayNumber) {
+        verboseLog(verbose, { log: "Ready to book this booking", booking });
         noBookingToday = false;
         const user = users.find(user => user.username === booking.user);
         if (!user) {
           throw new Error(`Could not find user ${user}`);
         }
 
+        verboseLog(verbose, "Update booking status to RUNNING");
         await updateBookingStatus(booking.id, "RUNNING");
 
         try {
+          verboseLog(verbose, "Create new page");
           const page = await browser.newPage();
+          verboseLog(verbose, "Attempt booking...");
           await attemptBooking(
             page,
             targetDate,
-            user.toObject(),
+            user,
             booking.time,
-            booking.court
+            booking.court,
+            verbose
           );
+          verboseLog(verbose, "Add log to booking");
           await addLogToBooking(
             booking.id,
             `Booking with ${user.name} for court #${booking.court} at ${
               booking.time
             }pm on ${targetDate.format("dddd, MMMM Do YYYY")}`
           );
+          verboseLog(verbose, "Update booking status to SUCCESS");
           await updateBookingStatus(booking.id, "SUCCESS");
 
           if (booking.repeat) {
@@ -182,21 +211,29 @@ exports.book = async function book() {
             );
           }
         } catch (err) {
-          await addLogToBooking(err.message);
+          verboseLog(verbose, { error2: err.message });
+          verboseLog(verbose, "Update booking status to PENDING in error");
           await updateBookingStatus(booking.id, "PENDING");
+          verboseLog(verbose, "Add log to booking in error");
+          await addLogToBooking(booking.id, err.message);
         }
       }
     }
 
     if (noBookingToday) {
-      await addLog(
-        `No booking planned for ${targetDate.format("dddd, MMMM Do YYYY")}`
-      );
+      const noBookingMessage = `No booking planned for ${targetDate.format(
+        "dddd, MMMM Do YYYY"
+      )}`;
+      verboseLog(verbose, noBookingMessage);
+      await addLog(noBookingMessage);
     }
 
+    verboseLog(verbose, "browser.close()");
     await browser.close();
   } catch (err) {
+    verboseLog(verbose, { error1: err.message });
     await addLog(err.message);
+    browser && (await browser.close());
     throw err;
   }
 };
