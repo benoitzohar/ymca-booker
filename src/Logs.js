@@ -7,7 +7,7 @@ function Logs({ logs }) {
       <Timeline>
         {logs.map(log => (
           <Timeline.Item>
-            <p>{log.createdAt}</p>
+            <p>{log.createdAt.toDate()}</p>
             <p>{log.message}</p>
           </Timeline.Item>
         ))}
