@@ -17,8 +17,6 @@ exports.handler = async (event, context) => {
   }
 };
 
-console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-
 // Allow to call `node trigger-booking.js` for debug purpose
 if (process.env.NODE_ENV !== "PRODUCTION") {
   new Promise(async resolve => {

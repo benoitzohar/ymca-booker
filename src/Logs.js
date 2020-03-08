@@ -2,12 +2,13 @@ import React from "react";
 import { Timeline } from "antd";
 
 function Logs({ logs }) {
+  console.log("[BZ] logs:", logs);
   return (
     <div className="Logs">
       <Timeline>
         {logs.map(log => (
-          <Timeline.Item>
-            <p>{log.createdAt.toDate()}</p>
+          <Timeline.Item key={log.id}>
+            <p>{log.createdAt}</p>
             <p>{log.message}</p>
           </Timeline.Item>
         ))}

@@ -34,7 +34,7 @@ function Bookings() {
   return db.collection("bookings");
 }
 
-exports.getBookings = async function getBookings(status) {
+exports.getBookings = async function getBookings(status, verbose) {
   const query = status ? Bookings().where("status", "==", status) : Bookings();
 
   return query.get().then(snapshot => {
@@ -122,13 +122,15 @@ function Logs() {
   return db.collection("logs");
 }
 
-exports.getLogs = async function getLogs() {
+exports.getLogs = async function getLogs(verbose) {
   return Logs()
+    .orderBy("createdAt", "desc")
+    .limit(50)
     .get()
     .then(snapshot => {
       const logs = [];
       snapshot.forEach(doc => {
-        logs.push(doc.data());
+        logs.push({ id: doc.id, ...doc.data() });
       });
       return { logs };
     });

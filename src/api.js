@@ -1,3 +1,5 @@
+import moment from "moment";
+
 const API_URL = "https://ymca.benoitzohar.com/.netlify/functions/";
 
 async function doFetch(endpoint, data = {}) {
@@ -13,7 +15,6 @@ async function doFetch(endpoint, data = {}) {
       body
     };
     const response = await fetch(API_URL + endpoint, params);
-    console.log("response:", response);
     return await response.json();
   } catch (error) {
     console.error(error);
@@ -22,6 +23,15 @@ async function doFetch(endpoint, data = {}) {
 }
 
 export const fetchLogs = async function fetchLogs() {
-  const { logs } = await doFetch("log-list");
-  return logs || [];
+  let { logs } = await doFetch("log-list");
+  logs = logs || [];
+  return logs.map(log => {
+    const createdAt = moment(new Date(log.createdAt._seconds * 1000));
+    return {
+      ...log,
+      createdAt: `${createdAt.fromNow()} (${createdAt.format(
+        "dddd, MMMM Do, h:mm:ss a"
+      )})`
+    };
+  });
 };

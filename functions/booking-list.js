@@ -10,8 +10,8 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { status } = querystring.parse(event.body);
-    const result = await getBookings(status || undefined);
+    const { status, verbose } = querystring.parse(event.body);
+    const result = await getBookings(status || undefined, verbose);
     if (!result) {
       return { statusCode: 200, body: "{}" };
     }
@@ -20,3 +20,16 @@ exports.handler = async (event, context) => {
     return { statusCode: 500, body: error.message };
   }
 };
+
+// Allow to call `node log-list.js` for debug purpose
+if (process.env.NODE_ENV !== "PRODUCTION") {
+  new Promise(async resolve => {
+    console.log(
+      await exports.handler({
+        httpMethod: "POST",
+        body: "token=test&verbose=true"
+      })
+    );
+    resolve();
+  });
+}
