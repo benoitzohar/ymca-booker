@@ -150,8 +150,13 @@ const tailFormItemLayout = {
 };
 
 export default function BookingAdd({ onDone, users }) {
+  const usersForSelect = users.map(user => ({
+    value: user.username,
+    label: user.name
+  }));
+
   const [court, setCourt] = useState(courts[0].value);
-  const [user, setUser] = useState(users[0].value);
+  const [user, setUser] = useState(usersForSelect[0].value);
   const [day, setDay] = useState(days[0].value);
   const [time, setTime] = useState(times[0].value);
   const [repeat, setRepeat] = useState(false);
@@ -171,11 +176,6 @@ export default function BookingAdd({ onDone, users }) {
     setLoading(false);
     onDone();
   };
-
-  const usersForSelect = users.map(user => ({
-    value: user.username,
-    label: user.name
-  }));
 
   return (
     <Card style={{ margin: "20px", padding: "4px" }}>

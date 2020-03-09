@@ -32,28 +32,39 @@ export default function Bookings({ users }) {
   useEffect(() => {
     if (value) {
       setBookings(
-        value.docs.map(doc => {
-          const booking = doc.data();
+        value.docs
+          .map(doc => {
+            const booking = doc.data();
 
-          return {
-            ...booking,
-            id: doc.id,
-            date: moment(new Date(booking.date))
-              .utc()
-              .format("dddd D MMMM"),
-            userName: getUserName(booking.user),
-            logs:
-              booking.logs &&
-              booking.logs.reverse().map(log => {
-                const date = new Date(log.createdAt.seconds * 1000);
-                return {
-                  ...log,
-                  date,
-                  dateFrom: moment(date).fromNow()
-                };
-              })
-          };
-        })
+            return {
+              ...booking,
+              id: doc.id,
+              rawDate: new Date(booking.date),
+              date: moment(new Date(booking.date))
+                .utc()
+                .format("dddd D MMMM"),
+              userName: getUserName(booking.user),
+              logs:
+                booking.logs &&
+                booking.logs.reverse().map(log => {
+                  const date = new Date(log.createdAt.seconds * 1000);
+                  return {
+                    ...log,
+                    date,
+                    dateFrom: moment(date).fromNow()
+                  };
+                })
+            };
+          })
+          .sort((a, b) => {
+            if (a.rawDate < b.rawDate) {
+              return 1;
+            }
+            if (a.rawDate > b.rawDate) {
+              return -1;
+            }
+            return 0;
+          })
       );
     }
   }, [value]);

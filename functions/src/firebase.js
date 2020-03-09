@@ -48,11 +48,15 @@ exports.getBookings = async function getBookings(status, verbose) {
 };
 
 exports.addBooking = async function addBooking(user, day, time, court, repeat) {
+  if (day < 1 || day > 7) {
+    day = 1;
+  }
   let nextRunDate = moment()
     .tz("America/Toronto")
-    .add(1, "weeks")
-    .add(2, "days")
-    .weekday(day);
+    .add(3, "days");
+  while (nextRunDate.isoWeekday() !== day) {
+    nextRunDate = nextRunDate.add(1, "days");
+  }
   const date = nextRunDate.format("YYYY-MM-DD");
 
   return Bookings()
