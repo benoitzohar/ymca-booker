@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer-core");
 const chromium = require("chrome-aws-lambda");
-const moment = require("moment");
+const moment = require("moment-timezone");
 
 const {
   getBookings,
@@ -41,7 +41,6 @@ const clickByText = async (page, text) => {
 async function attemptBooking(p, targetDate, user, time, court, verbose) {
   const targetDay = targetDate.get("date");
   const targetMonth = targetDate.get("month") + 1;
-  verboseLog(verbose, { targetDate: targetDate.format() });
 
   verboseLog(verbose, { browser: "Go to" });
   await p.goto("https://inscription.ymcaquebec.org");
@@ -167,8 +166,13 @@ exports.book = async function book(verbose = false) {
       headless: chromium.headless
     });
     let noBookingToday = true;
-    const targetDate = moment().add(2, "days");
+    const targetDate = moment()
+      .tz("America/Toronto")
+      .add(2, "days");
     const targetDayNumber = targetDate.weekday();
+
+    verboseLog(verbose, { targetDate: targetDate.format() });
+    verboseLog(verbose, { targetDayNumber });
 
     for (const booking of bookings) {
       if (booking.day === targetDayNumber) {
