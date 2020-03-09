@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import firebase from "firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
 import moment from "moment";
-import { Collapse, Timeline, Tag, Alert, Button, Icon } from "antd";
+import { Collapse, Timeline, Tag, Alert, Icon, Tooltip } from "antd";
 
 import BookingAdd from "./BookingAdd";
 
@@ -75,13 +75,20 @@ export default function Bookings({ users }) {
       const header = (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
-            <div style={{ fontSize: "16px" }}>
+            <div style={{ fontSize: "15px" }}>
               <b>{booking.date}</b> at {booking.time}pm
             </div>
-            <div>
-              <span>
-                Court #{booking.court} | {booking.userName}
-              </span>
+            <div style={{ fontSize: "13px" }}>
+              Court #{booking.court} | {booking.userName}
+              {booking.repeat ? (
+                <span>
+                  {" "}
+                  |{" "}
+                  <Tooltip title="Recurring booking">
+                    <Icon type="sync" style={{ marginLeft: "4px" }} />
+                  </Tooltip>
+                </span>
+              ) : null}
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center" }}>
