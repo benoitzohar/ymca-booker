@@ -106,19 +106,23 @@ const times = [
   },
   {
     value: "7:45",
-    label: "19:45 - 20:30"
+    label: "19:45 - 20:30",
+    weekendDisabled: true
   },
   {
     value: "8:30",
-    label: "20:30 - 21:15"
+    label: "20:30 - 21:15",
+    weekendDisabled: true
   },
   {
     value: "9:15",
-    label: "21:15 - 22:00"
+    label: "21:15 - 22:00",
+    weekendDisabled: true
   },
   {
     value: "10:00",
-    label: "22:00 - 22:45"
+    label: "22:00 - 22:45",
+    weekendDisabled: true
   }
 ];
 
@@ -218,11 +222,15 @@ export default function BookingAdd({ onDone, users }) {
             onChange={setTime}
             disabled={loading}
           >
-            {times.map(time => (
-              <Option value={time.value} key={time.value}>
-                {time.label}
-              </Option>
-            ))}
+            {times
+              .filter(
+                time => !["6", "7"].includes(day) || !time.weekendDisabled
+              )
+              .map(time => (
+                <Option value={time.value} key={time.value}>
+                  {time.label}
+                </Option>
+              ))}
           </Select>
         </Form.Item>
         <Form.Item label="User" style={{ marginBottom: "10px" }}>
