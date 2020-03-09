@@ -18,7 +18,7 @@ export default function Bookings() {
     firebase
       .firestore()
       .collection("bookings")
-      .orderBy("updatedAt", "desc")
+      .orderBy("updatedAt", "asc")
       .limit(10)
   );
   const [bookings, setBookings] = useState([]);
@@ -68,45 +68,47 @@ export default function Bookings() {
 
       return (
         <Collapse.Panel header={header} key={index}>
-          {booking.logs && (
-            <div>
-              {booking.repeat ? (
-                <div style={{ margin: "20px" }}>
-                  <Alert
-                    message="ℹ️ This booking is recurring: a new booking will automatically be created when this one is done."
-                    type="info"
-                  />
-                </div>
-              ) : (
-                <div style={{ margin: "20px" }}>
-                  <Alert
-                    message="ℹ️ This is a one-time only booking."
-                    type="info"
-                  />
-                </div>
-              )}
-              {booking.attempts && (
-                <div style={{ margin: "20px" }}>
-                  <Alert
-                    message={`${booking.attempts} attempt${
-                      booking.attempts > 1 ? "s" : ""
-                    }`}
-                    type="warning"
-                  />
-                </div>
-              )}
-              <h3>Timeline</h3>
-              <Timeline>
-                {booking.logs &&
-                  booking.logs.map((log, index) => (
-                    <Timeline.Item key={index}>
-                      <p>{log.dateFrom}</p>
-                      <p>{log.message}</p>
-                    </Timeline.Item>
-                  ))}
-              </Timeline>
-            </div>
-          )}
+          <div>
+            {booking.repeat ? (
+              <div style={{ margin: "20px" }}>
+                <Alert
+                  message="ℹ️ This booking is recurring: a new booking will automatically be created when this one is done."
+                  type="info"
+                />
+              </div>
+            ) : (
+              <div style={{ margin: "20px" }}>
+                <Alert
+                  message="ℹ️ This is a one-time only booking."
+                  type="info"
+                />
+              </div>
+            )}
+            {booking.attempts && (
+              <div style={{ margin: "20px" }}>
+                <Alert
+                  message={`${booking.attempts} attempt${
+                    booking.attempts > 1 ? "s" : ""
+                  }`}
+                  type="warning"
+                />
+              </div>
+            )}
+            {booking.logs && (
+              <>
+                <h3>Timeline</h3>
+                <Timeline>
+                  {booking.logs &&
+                    booking.logs.map((log, index) => (
+                      <Timeline.Item key={index}>
+                        <p>{log.dateFrom}</p>
+                        <p>{log.message}</p>
+                      </Timeline.Item>
+                    ))}
+                </Timeline>
+              </>
+            )}
+          </div>
         </Collapse.Panel>
       );
     });

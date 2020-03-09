@@ -41,6 +41,8 @@ const clickByText = async (page, text) => {
 async function attemptBooking(p, targetDate, user, time, court, verbose) {
   const targetDay = targetDate.get("date");
   const targetMonth = targetDate.get("month") + 1;
+  verboseLog(verbose, { targetDate: targetDate.format() });
+
   verboseLog(verbose, { browser: "Go to" });
   await p.goto("https://inscription.ymcaquebec.org");
 
@@ -165,7 +167,7 @@ exports.book = async function book(verbose = false) {
       headless: chromium.headless
     });
     let noBookingToday = true;
-    const targetDate = moment.utc().add(2, "days");
+    const targetDate = moment.add(2, "days");
     const targetDayNumber = targetDate.weekday();
 
     for (const booking of bookings) {
