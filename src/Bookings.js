@@ -67,7 +67,7 @@ export default function Bookings({ users }) {
           })
       );
     }
-  }, [value]);
+  }, [value, users]);
 
   const panels =
     bookings &&
