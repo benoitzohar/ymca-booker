@@ -42,9 +42,8 @@ export default function Bookings({ users }) {
           return {
             ...booking,
             id: doc.id,
-            title: `${day} at ${booking.time}pm | Court #${
-              booking.court
-            } | ${getUserName(booking.user)}`,
+            day,
+            userName: getUserName(booking.user),
             logs:
               booking.logs &&
               booking.logs.reverse().map(log => {
@@ -66,7 +65,16 @@ export default function Bookings({ users }) {
     bookings.map((booking, index) => {
       const header = (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>{booking.title}</span>
+          <div>
+            <div style={{ fontSize: "16px" }}>
+              <b>{booking.day}</b> at {booking.time}pm
+            </div>
+            <div>
+              <span>
+                Court #{booking.court} | {booking.userName}
+              </span>
+            </div>
+          </div>
           <div style={{ display: "flex", alignItems: "center" }}>
             <Tag color={tagColors[booking.status]}>{booking.status}</Tag>
           </div>
