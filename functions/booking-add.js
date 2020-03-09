@@ -16,7 +16,13 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    await addBooking(user, day, time, court, repeat === "true");
+    await addBooking(
+      user,
+      parseInt(day, 10),
+      time,
+      parseInt(court, 10),
+      repeat === "true"
+    );
     return response({ status: "OK" });
   } catch (error) {
     return response(error.message, 500);
