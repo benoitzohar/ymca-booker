@@ -18,13 +18,14 @@ async function doFetch(endpoint, data = {}) {
     return await response.json();
   } catch (error) {
     console.error(error);
-    message.error(error.message);
+    message.error(error.message || "An error occured");
     throw error;
   }
 }
 
 export const fetchUsers = async function fetchUsers() {
-  return await doFetch("user-list");
+  const { users } = await doFetch("user-list");
+  return users;
 };
 
 export const triggerBooking = async function triggerBooking() {

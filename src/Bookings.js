@@ -13,7 +13,7 @@ const tagColors = {
   FAILURE: "red"
 };
 
-export default function Bookings() {
+export default function Bookings({ users }) {
   const [value, loading, error] = useCollection(
     firebase
       .firestore()
@@ -23,6 +23,11 @@ export default function Bookings() {
   );
   const [bookings, setBookings] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
+
+  function getUserName(username) {
+    const user = users && users.find(user => user.username === username);
+    return (user && user.name) || username;
+  }
 
   useEffect(() => {
     if (value) {
@@ -37,7 +42,9 @@ export default function Bookings() {
           return {
             ...booking,
             id: doc.id,
-            title: `Court #${booking.court} at ${booking.time}pm on ${day} for ${booking.user}`,
+            title: `${day} at ${booking.time}pm | Court #${
+              booking.court
+            } | ${getUserName(booking.user)}`,
             logs:
               booking.logs &&
               booking.logs.reverse().map(log => {
@@ -87,9 +94,9 @@ export default function Bookings() {
             {booking.attempts && (
               <div style={{ margin: "20px" }}>
                 <Alert
-                  message={`${booking.attempts} attempt${
+                  message={`⚠️ ${booking.attempts} failed attempt${
                     booking.attempts > 1 ? "s" : ""
-                  }`}
+                  }. We will try again in 10 minutes and cancel this booking after 6 failures.`}
                   type="warning"
                 />
               </div>
@@ -123,7 +130,7 @@ export default function Bookings() {
           <Icon type="plus-circle" theme="twoTone" />
         </div>
       </div>
-      {showAdd && <BookingAdd onDone={() => setShowAdd(false)} />}
+      {showAdd && <BookingAdd onDone={() => setShowAdd(false)} users={users} />}
       {error && <strong>Error: {JSON.stringify(error)}</strong>}
       {loading && <span>Loading...</span>}
       <Collapse>{panels}</Collapse>

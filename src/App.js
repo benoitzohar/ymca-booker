@@ -39,7 +39,7 @@ function App() {
         .then(setUsers)
         .catch(err => {
           console.error(err.message);
-          //alert("Could not fetch Users");
+          setLocalToken(null);
         });
     }
   }, [token]);
@@ -52,7 +52,7 @@ function App() {
         </h1>
       </Header>
       <Content style={{ padding: "0 10px", marginTop: "80px" }}>
-        <Bookings />
+        <Bookings users={users} />
         <Actions />
         <Logs />
       </Content>

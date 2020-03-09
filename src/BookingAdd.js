@@ -17,25 +17,6 @@ import { createBooking } from "./api";
 
 const { Option } = Select;
 
-const users = [
-  {
-    value: "ben",
-    label: "Benoit Zohar"
-  },
-  {
-    value: "ugo",
-    label: "Ugo Angles"
-  },
-  {
-    value: "michel",
-    label: "Michel Frignon"
-  },
-  {
-    value: "tiph",
-    label: "Tiphaine Gantner"
-  }
-];
-
 const days = [
   {
     value: "1",
@@ -164,7 +145,7 @@ const tailFormItemLayout = {
   }
 };
 
-export default function BookingAdd({ onDone }) {
+export default function BookingAdd({ onDone, users }) {
   const [court, setCourt] = useState(courts[0].value);
   const [user, setUser] = useState(users[0].value);
   const [day, setDay] = useState(days[0].value);
@@ -186,6 +167,11 @@ export default function BookingAdd({ onDone }) {
     setLoading(false);
     onDone();
   };
+
+  const usersForSelect = users.map(user => ({
+    value: user.username,
+    label: user.name
+  }));
 
   return (
     <Card style={{ margin: "20px", padding: "4px" }}>
@@ -241,11 +227,11 @@ export default function BookingAdd({ onDone }) {
         </Form.Item>
         <Form.Item label="User" style={{ marginBottom: "10px" }}>
           <Select
-            defaultValue={users[0].value}
+            defaultValue={usersForSelect[0].value}
             onChange={setUser}
             disabled={loading}
           >
-            {users.map(user => (
+            {usersForSelect.map(user => (
               <Option value={user.value} key={user.value}>
                 {user.label}
               </Option>
