@@ -1,3 +1,5 @@
+// @ts-check
+
 const puppeteer = require("puppeteer-core");
 const chromium = require("chrome-aws-lambda");
 const moment = require("moment-timezone");
@@ -37,6 +39,99 @@ const clickByText = async (page, text) => {
     throw new Error(`Link not found: ${text}`);
   }
 };
+
+async function proceedForBooking(
+  browser,
+  booking,
+  users,
+  targetDate,
+  targetDayNumber,
+  targetMonthNumber,
+  verbose
+) {
+  const bookingDate = moment.tz(booking.date, "America/Toronto");
+  if (
+    bookingDate.date() === targetDayNumber &&
+    bookingDate.month() === targetMonthNumber
+  ) {
+    verboseLog(verbose, { log: "Ready to book this booking", booking });
+    const user = users.find(user => user.username === booking.user);
+    if (!user) {
+      throw new Error(`Could not find user ${user}`);
+    }
+
+    verboseLog(verbose, "Update booking status to RUNNING");
+    updateBookingStatus(booking.id, "RUNNING", (booking.attempts || 0) + 1);
+
+    try {
+      verboseLog(verbose, "Create new incognito context");
+      const context = await browser.createIncognitoBrowserContext();
+      verboseLog(verbose, "Create new page");
+      const page = await context.newPage();
+      verboseLog(verbose, "Attempt booking...");
+      await attemptBooking(
+        page,
+        targetDate,
+        user,
+        booking.time,
+        booking.court,
+        verbose
+      );
+      verboseLog(verbose, "Close context");
+      await context.close();
+      verboseLog(verbose, "Add log to booking");
+      await addLogToBooking(
+        booking.id,
+        `Booked with ${user.name} for court #${booking.court} at ${
+          booking.time
+        }pm on ${targetDate.format("dddd, MMMM Do YYYY")}`
+      );
+      verboseLog(verbose, "Update booking status to SUCCESS");
+      await updateBookingStatus(booking.id, "SUCCESS");
+
+      if (booking.repeat) {
+        verboseLog(verbose, {
+          log: "Create new reccurring booking for",
+          booking
+        });
+        await addBooking(
+          user.id,
+          booking.day,
+          booking.time,
+          booking.court,
+          true
+        );
+      }
+    } catch (err) {
+      verboseLog(verbose, { error2: err.message });
+      if (booking.attempts >= MAX_ATTEMPTS) {
+        verboseLog(verbose, "Update booking status to FAILURE in error");
+        await updateBookingStatus(booking.id, "FAILURE");
+        verboseLog(verbose, {
+          log: "Create new reccurring booking for",
+          booking
+        });
+        if (booking.repeat) {
+          await addBooking(
+            user.id,
+            booking.day,
+            booking.time,
+            booking.court,
+            true
+          );
+        }
+      } else {
+        verboseLog(verbose, "Update booking status to PENDING in error");
+        await updateBookingStatus(booking.id, "PENDING");
+      }
+
+      verboseLog(verbose, "Add log to booking in error");
+      await addLogToBooking(booking.id, err.message);
+    }
+    return true;
+  }
+  return false;
+}
 
 async function attemptBooking(p, targetDate, user, time, court, verbose) {
   const targetDay = targetDate.get("date");
@@ -148,8 +243,33 @@ function verboseLog(verbose, data) {
   }
 }
 
+//
+// AWS lambdas time out after 10s.
+// Doing as many things asynchroneous as possible
+// to avoid getting cut off.
+//
 exports.book = async function book(verbose = false) {
+  const runningBookings = await getBookings("RUNNING");
   const { bookings } = await getBookings("PENDING");
+
+  // add the previously RUNNING bookings to avoid waiting for the
+  // database request
+  if (
+    runningBookings &&
+    runningBookings.bookings &&
+    runningBookings.bookings.length
+  ) {
+    verboseLog(
+      verbose,
+      runningBookings.bookings.length +
+        " booking(s) were still RUNNING. Resetting them..."
+    );
+    runningBookings.bookings.forEach(booking => {
+      bookings.push(booking);
+      updateBookingStatus(booking.id, "PENDING");
+    });
+  }
+
   verboseLog(verbose, { bookings });
   const { users } = await getUsers();
   verboseLog(verbose, { users });
@@ -165,94 +285,39 @@ exports.book = async function book(verbose = false) {
       defaultViewport: chromium.defaultViewport,
       headless: chromium.headless
     });
-    let noBookingToday = true;
+
     const targetDate = moment()
       .tz("America/Toronto")
       .add(2, "days");
-    const targetDayNumber = targetDate.weekday();
+    const targetDayNumber = targetDate.date();
+    const targetMonthNumber = targetDate.month();
 
-    verboseLog(verbose, { targetDate: targetDate.format() });
-    verboseLog(verbose, { targetDayNumber });
+    verboseLog(verbose, {
+      targetDate: targetDate.format(),
+      targetDayNumber,
+      targetMonthNumber
+    });
+
+    const proceeds = [];
 
     for (const booking of bookings) {
-      if (booking.day === targetDayNumber) {
-        verboseLog(verbose, { log: "Ready to book this booking", booking });
-        noBookingToday = false;
-        const user = users.find(user => user.username === booking.user);
-        if (!user) {
-          throw new Error(`Could not find user ${user}`);
-        }
-
-        verboseLog(verbose, "Update booking status to RUNNING");
-        await updateBookingStatus(
-          booking.id,
-          "RUNNING",
-          (booking.attempts || 0) + 1
-        );
-
-        try {
-          verboseLog(verbose, "Create new page");
-          const page = await browser.newPage();
-          verboseLog(verbose, "Attempt booking...");
-          await attemptBooking(
-            page,
-            targetDate,
-            user,
-            booking.time,
-            booking.court,
-            verbose
-          );
-          verboseLog(verbose, "Add log to booking");
-          await addLogToBooking(
-            booking.id,
-            `Booked with ${user.name} for court #${booking.court} at ${
-              booking.time
-            }pm on ${targetDate.format("dddd, MMMM Do YYYY")}`
-          );
-          verboseLog(verbose, "Update booking status to SUCCESS");
-          await updateBookingStatus(booking.id, "SUCCESS");
-
-          if (booking.repeat) {
-            verboseLog(verbose, {
-              log: "Create new reccurring booking for",
-              booking
-            });
-            await addBooking(
-              user.id,
-              booking.day,
-              booking.time,
-              booking.court,
-              true
-            );
-          }
-        } catch (err) {
-          verboseLog(verbose, { error2: err.message });
-          if (booking.attempts >= MAX_ATTEMPTS) {
-            verboseLog(verbose, "Update booking status to FAILURE in error");
-            await updateBookingStatus(booking.id, "FAILURE");
-            verboseLog(verbose, {
-              log: "Create new reccurring booking for",
-              booking
-            });
-            if (booking.repeat) {
-              await addBooking(
-                user.id,
-                booking.day,
-                booking.time,
-                booking.court,
-                true
-              );
-            }
-          } else {
-            verboseLog(verbose, "Update booking status to PENDING in error");
-            await updateBookingStatus(booking.id, "PENDING");
-          }
-
-          verboseLog(verbose, "Add log to booking in error");
-          await addLogToBooking(booking.id, err.message);
-        }
-      }
+      proceeds.push(
+        proceedForBooking(
+          browser,
+          booking,
+          users,
+          targetDate,
+          targetDayNumber,
+          targetMonthNumber,
+          verbose
+        )
+      );
     }
+
+    let noBookingToday = true;
+    await Promise.all(proceeds).then(haveBooking => {
+      noBookingToday = !haveBooking.find(hasBooking => !!hasBooking);
+    });
 
     if (noBookingToday) {
       const noBookingMessage = `No booking planned for ${targetDate.format(

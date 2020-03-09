@@ -35,14 +35,12 @@ export default function Bookings({ users }) {
         value.docs.map(doc => {
           const booking = doc.data();
 
-          const day = moment()
-            .day(booking.day)
-            .format("dddd");
-
           return {
             ...booking,
             id: doc.id,
-            day,
+            date: moment(new Date(booking.date))
+              .utc()
+              .format("dddd D MMMM"),
             userName: getUserName(booking.user),
             logs:
               booking.logs &&
@@ -67,7 +65,7 @@ export default function Bookings({ users }) {
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
             <div style={{ fontSize: "16px" }}>
-              <b>{booking.day}</b> at {booking.time}pm
+              <b>{booking.date}</b> at {booking.time}pm
             </div>
             <div>
               <span>
@@ -87,7 +85,7 @@ export default function Bookings({ users }) {
             {booking.repeat ? (
               <div style={{ margin: "20px" }}>
                 <Alert
-                  message="ℹ️ This booking is recurring: a new booking will automatically be created when this one is done."
+                  message="ℹ️ This booking is recurring: a new booking will automatically be created for the next week when this one is done."
                   type="info"
                 />
               </div>
@@ -99,7 +97,7 @@ export default function Bookings({ users }) {
                 />
               </div>
             )}
-            {booking.attempts && (
+            {booking.attempts && booking.status !== "FAILURE" && (
               <div style={{ margin: "20px" }}>
                 <Alert
                   message={`⚠️ ${booking.attempts} failed attempt${

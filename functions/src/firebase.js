@@ -1,5 +1,6 @@
 var admin = require("firebase-admin");
 const uuid = require("uuid");
+const moment = require("moment-timezone");
 
 var serviceAccount = require("./google-credentials.json");
 
@@ -47,11 +48,19 @@ exports.getBookings = async function getBookings(status, verbose) {
 };
 
 exports.addBooking = async function addBooking(user, day, time, court, repeat) {
+  let nextRunDate = moment()
+    .tz("America/Toronto")
+    .add(1, "weeks")
+    .add(2, "days")
+    .weekday(day);
+  const date = nextRunDate.format("YYYY-MM-DD");
+
   return Bookings()
     .doc(uuid.v4())
     .set({
       user,
       day,
+      date,
       time,
       court,
       repeat,
