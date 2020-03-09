@@ -78,55 +78,43 @@ async function proceedForBooking(
         verbose
       );
       verboseLog(verbose, "Close context");
-      await context.close();
+      context.close();
       verboseLog(verbose, "Add log to booking");
-      await addLogToBooking(
+      addLogToBooking(
         booking.id,
         `Booked with ${user.name} for court #${booking.court} at ${
           booking.time
         }pm on ${targetDate.format("dddd, MMMM Do YYYY")}`
       );
       verboseLog(verbose, "Update booking status to SUCCESS");
-      await updateBookingStatus(booking.id, "SUCCESS");
+      updateBookingStatus(booking.id, "SUCCESS");
 
       if (booking.repeat) {
         verboseLog(verbose, {
           log: "Create new reccurring booking for",
           booking
         });
-        await addBooking(
-          user.id,
-          booking.day,
-          booking.time,
-          booking.court,
-          true
-        );
+        addBooking(user.id, booking.day, booking.time, booking.court, true);
       }
     } catch (err) {
       verboseLog(verbose, { error2: err.message });
       if (booking.attempts >= MAX_ATTEMPTS) {
         verboseLog(verbose, "Update booking status to FAILURE in error");
-        await updateBookingStatus(booking.id, "FAILURE");
+        updateBookingStatus(booking.id, "FAILURE");
         verboseLog(verbose, {
           log: "Create new reccurring booking for",
           booking
         });
         if (booking.repeat) {
-          await addBooking(
-            user.id,
-            booking.day,
-            booking.time,
-            booking.court,
-            true
-          );
+          addBooking(user.id, booking.day, booking.time, booking.court, true);
         }
       } else {
         verboseLog(verbose, "Update booking status to PENDING in error");
-        await updateBookingStatus(booking.id, "PENDING");
+        updateBookingStatus(booking.id, "PENDING");
       }
 
       verboseLog(verbose, "Add log to booking in error");
-      await addLogToBooking(booking.id, err.message);
+      addLogToBooking(booking.id, err.message);
     }
     return true;
   }
@@ -275,7 +263,7 @@ exports.book = async function book(verbose = false) {
   verboseLog(verbose, { users });
 
   verboseLog(verbose, "setLastRun()");
-  await setLastRun();
+  setLastRun();
   let browser;
   try {
     verboseLog(verbose, "Starting puppeteer.launch() from book.js...");
@@ -324,15 +312,15 @@ exports.book = async function book(verbose = false) {
         "dddd, MMMM Do YYYY"
       )}`;
       verboseLog(verbose, noBookingMessage);
-      await addLog(noBookingMessage);
+      addLog(noBookingMessage);
     }
 
     verboseLog(verbose, "browser.close()");
-    await browser.close();
+    browser.close();
   } catch (err) {
     verboseLog(verbose, { error1: err.message });
-    await addLog(err.message);
-    browser && (await browser.close());
+    addLog(err.message);
+    browser && browser.close();
     throw err;
   }
 };
