@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    await addBooking(user, day, time, court, repeat);
+    await addBooking(user, day, time, court, repeat === "true");
     return response({ status: "OK" });
   } catch (error) {
     return response(error.message, 500);

@@ -31,3 +31,20 @@ export const triggerBooking = async function triggerBooking() {
   await doFetch("trigger-booking");
   return true;
 };
+
+export const createBooking = async function createBooking({
+  user,
+  day,
+  time,
+  court,
+  repeat
+}) {
+  await doFetch("booking-add", {
+    user,
+    day,
+    time,
+    court,
+    repeat
+  });
+  return true;
+};

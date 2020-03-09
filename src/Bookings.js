@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Collapse, Timeline, Tag, Alert } from "antd";
 import firebase from "firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
 import moment from "moment";
+import { Collapse, Timeline, Tag, Alert, Button, Icon } from "antd";
+
+import BookingAdd from "./BookingAdd";
 
 const tagColors = {
   PENDING: "cyan",
@@ -13,9 +15,14 @@ const tagColors = {
 
 export default function Bookings() {
   const [value, loading, error] = useCollection(
-    firebase.firestore().collection("bookings")
+    firebase
+      .firestore()
+      .collection("bookings")
+      .orderBy("updatedAt", "desc")
+      .limit(10)
   );
   const [bookings, setBookings] = useState([]);
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     if (value) {
@@ -30,7 +37,7 @@ export default function Bookings() {
           return {
             ...booking,
             id: doc.id,
-            title: `Court #${booking.court} at ${booking.time}pm on ${day}`,
+            title: `Court #${booking.court} at ${booking.time}pm on ${day} for ${booking.user}`,
             logs:
               booking.logs &&
               booking.logs.reverse().map(log => {
@@ -104,8 +111,17 @@ export default function Bookings() {
       );
     });
   return (
-    <div className="Bookings">
-      <h3>Bookings</h3>
+    <div>
+      <div style={{ display: "flex" }}>
+        <h3>Bookings</h3>
+        <div
+          onClick={() => setShowAdd(!showAdd)}
+          style={{ marginLeft: "10px", padding: "2px" }}
+        >
+          <Icon type="plus-circle" theme="twoTone" />
+        </div>
+      </div>
+      {showAdd && <BookingAdd onDone={() => setShowAdd(false)} />}
       {error && <strong>Error: {JSON.stringify(error)}</strong>}
       {loading && <span>Loading...</span>}
       <Collapse>{panels}</Collapse>
