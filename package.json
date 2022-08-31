@@ -9,7 +9,7 @@
     "firebase": "^7.10.0",
     "firebase-admin": "8.9.2",
     "moment": "2.29.4",
-    "moment-timezone": "^0.5.28",
+    "moment-timezone": "^0.5.35",
     "nodemon": "2.0.2",
     "puppeteer-core": "2.1.1",
     "querystring": "0.2.0",
